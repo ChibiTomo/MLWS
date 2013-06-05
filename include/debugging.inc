@@ -3,6 +3,7 @@ function error(Exception $e) {
 	global $g_debugger;
 
 	$g_debugger->error($e);
+	debug_flush();
 }
 
 function debug($txt) {

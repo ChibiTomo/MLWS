@@ -28,9 +28,12 @@ class Debugger {
 		} else {
 			$this->trace[] = '[ERROR] '.$e->getMessage();
 			foreach ($trace as $el) {
+				$args = Debugger::a2s($el['args'], true);
+				$args = preg_replace('#^Array \(#', '', $args);
+				$args = preg_replace('#'.PHP_EOL.'(&emsp;)*\)$#', '', $args);
 				$this->trace[] = tab(4).$el['file'].' at line '.
 						$el['line'].': '.$el['function'].'('.
-						Debugger::a2s($el['args'], true).')';
+						$args.')';
 			}
 			$this->trace[] = '';
 		}
@@ -57,23 +60,33 @@ class Debugger {
 		$traces = $e->getTrace();
 		$trace = $traces[0];
 		if ($autoflush || $this->autoflush) {
-			Debugger::println("[DEBUG] ".$trace["file"].":".$trace["line"]);
+			Debugger::println('[DEBUG] '.$trace['file'].':'.$trace['line']);
 			Debugger::println(tab(4).$txt."<br/>");
 		} else {
-			$this->trace[] = "[DEBUG] ".$trace["file"].":".$trace["line"];
-			$lines = explode("<br />", nl2br($txt));
+			$this->trace[] = '[DEBUG] '.$trace['file'].':'.$trace['line'];
+			$lines = explode('<br />', nl2br($txt));
 			foreach ($lines as $line) {
 				$line = trim($line);
 				$this->trace[] = tab(4).$line;
 			}
-			$this->trace[] = "";
+			$this->trace[] = '';
 		}
 	}
 
 	public function flush() {
+		if (!$this->is_on()) {
+			return null;
+		}
 		$str = join('<br />'.PHP_EOL, $this->trace);
 		$this->trace = array();
 		return $str;
+	}
+	
+	public function set_autoflush($b) {
+		if (!is_bool($b)) {
+			throw new Exception('set_autoflush expect Argument 1 to be bool');
+		}
+		$this->autoflush = $b;
 	}
 
 	public function is_on() {
@@ -110,7 +123,7 @@ class Debugger {
 			}
 
 			if ($only_values) {
-				$array[] = $value;
+				$array[] = Debugger::to_string($value, $tab);
 			} else {
 				$debut = '';
 				if ($i == 0) {
@@ -188,7 +201,7 @@ class Debugger {
 		return $result;
 	}
 
-	private static function to_string($var, $tab) {
+	private static function to_string($var, $tab = 0) {
 		$result = null;
 		if (is_array($var)) {
 			$result = Debugger::a2s($var, false, $tab);
@@ -198,6 +211,10 @@ class Debugger {
 			} else {
 				$result = Debugger::o2s($var, $tab);
 			}
+		} else if (is_bool($var)) {
+			$result = ($var)? 'B_TRUE' : 'B_FALSE';
+		} else if (is_null($var)) {
+			$result = 'NULL_VALUE';
 		} else {
 			$result = strval($var);
 		}

@@ -2,17 +2,18 @@
 /**
  *
  */
-require_once 'include/misc.inc';
-require_once 'include/global.inc';
-require_once 'include/debugging.inc';
 
-//header("Content-Type: text/plain");
+require_once 'include/misc.inc';
+
+set_base_dir();
+
+require_once 'include/include.inc';
+
 try {
-	debug('toto');
-	debug($g_debugger);
-	debug_flush();
-	debug_flush();
-	debug('toto');
+	init();
+	//install_check();
+	debug(HOST);
+	debug(BASE_DIR);
 	debug_flush();
 } catch (Exception $e) {
 	error($e);

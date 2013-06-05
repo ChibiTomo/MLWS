@@ -51,4 +51,22 @@ function redirect_to($path) {
 	header('Location: ' . $path);
 	header('Cache-Control: no-cache');
 }
+
+function set_host() {
+	if (isset($_SERVER["HTTPS"])) {
+		$base_url = HTTPS_ACCESS;
+	} else {
+		$base_url = 'http://' . $_SERVER['SERVER_NAME'] . dirname($_SERVER['SCRIPT_NAME']);
+	}
+	
+	define('HOST', $base_url);
+}
+
+function set_base_dir() {
+	define('BASE_DIR', getcwd());
+}
+
+function init() {
+	set_host();
+}
 ?>
